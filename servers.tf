@@ -21,7 +21,7 @@ variable "component" {
     }
     mongodb = {
       name = "mongodb"
-      instance_type = "t3.small"
+      instance_type = "t3.micro"
     }
     catalogue = {
       name = "catalogue"
@@ -37,7 +37,7 @@ variable "component" {
     }
     cart = {
       name = "cart"
-      instance_type = "t3.small"
+      instance_type = "t3.micro"
     }
     mysql = {
       name = "mysql"
@@ -49,11 +49,11 @@ variable "component" {
     }
     payment = {
       name = "payment"
-      instance_type = "t3.small"
+      instance_type = "t3.medium"
     }
     shipping = {
       name = "shipping"
-      instance_type = "t3.small"
+      instance_type = "t3.medium"
     }
   }
 }
@@ -69,7 +69,7 @@ resource "aws_instance" "instance" {
     Name = each.value["name"]
   }
 }
-#
+
 resource "aws_route53_record" "DNS_Records" {
   for_each = var.component
   zone_id = "Z07549141EOZGRX0U9S5Y"
