@@ -8,33 +8,77 @@ data "aws_security_group" "allow-all" {
   name = "allow-all"
 }
 
-variable "instance_type" {
-  default = "t3.small"
-}
+#variable "instance_type" {
+#  default = "t3.small"
+#}
 
 variable "component" {
-  default = ["frontend","mongodb","catalogue"]
+  #default = ["frontend","mongodb","catalogue"]
+  default = {
+    frontend = {
+      name = "frontend"
+      instance_type = "t3.small"
+    }
+    mongodb = {
+      name = "mongodb"
+      instance_type = "t3.small"
+    }
+    catalogue = {
+      name = "catalogue"
+      instance_type = "t3.small"
+    }
+    redis = {
+      name = "redis"
+      instance_type = "t3.small"
+    }
+    user = {
+      name = "user"
+      instance_type = "t3.small"
+    }
+    cart = {
+      name = "cart"
+      instance_type = "t3.small"
+    }
+    mysql = {
+      name = "mysql"
+      instance_type = "t3.small"
+    }
+    rabbitmq = {
+      name = "rabbitmq"
+      instance_type = "t3.small"
+    }
+    payment = {
+      name = "payment"
+      instance_type = "t3.small"
+    }
+    shipping = {
+      name = "shipping"
+      instance_type = "t3.small"
+    }
+  }
 }
 
 resource "aws_instance" "instance" {
-  count = length(var.component)
+  for_each = var.component
+#  count = length(var.component)
   ami           = data.aws_ami.centos.image_id
-  instance_type = var.instance_type
+  instance_type = each.value[instance_type]
   vpc_security_group_ids = [data.aws_security_group.allow-all.id]
 
   tags = {
-    Name = "frontend"
+    Name = each.value["name"]
   }
 }
 #
-#resource "aws_route53_record" "frontend" {
-#  zone_id = "Z07549141EOZGRX0U9S5Y"
-#  name    = "frontend-dev.sreenivasulareddydevops.online"
-#  type    = "A"
-#  ttl     = 30
-#  records = [aws_instance.frontend.private_ip]
-#}
-#
+resource "aws_route53_record" "DNS_Records" {
+  for_each = var.component
+  zone_id = "Z07549141EOZGRX0U9S5Y"
+  name    = "${each.value["name"]}-dev.sreenivasulareddydevops.online"
+  type    = "A"
+  ttl     = 30
+  records = [aws_instance.instance[each.value["name"]].private_ip]
+}
+
 #resource "aws_instance" "mongodb" {
 #  ami           = data.aws_ami.centos.image_id
 #  instance_type = var.instance_type
