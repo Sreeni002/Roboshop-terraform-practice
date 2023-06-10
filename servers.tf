@@ -1,3 +1,22 @@
+variable "env" {
+  default = ""
+}
+variable "componet" {
+  default = ""
+}
+variable "component" {
+  default = ""
+}
+module "servers" {
+  for_each = var.component
+
+  source = "./module"
+  component_name = each.value["name"]
+  env = var.env
+  instance_type = each.value["instance_type"]
+  password = lookup(each.value,"password","null")
+}
+
 #data "aws_ami" "centos" {
 #  most_recent      = true
 #  name_regex       = "Centos-8-DevOps-Practice"
@@ -58,26 +77,46 @@
  # }
 #}
 
-resource "aws_instance" "instance" {
-  for_each = var.component
-#  count = length(var.component)
-  ami           = data.aws_ami.centos.image_id
-  instance_type = each.value["instance_type"]
-  vpc_security_group_ids = [data.aws_security_group.allow-all.id]
-
-  tags = {
-    Name = each.value["name"]
-  }
-}
-
-resource "aws_route53_record" "DNS_Records" {
-  for_each = var.component
-  zone_id = "Z07549141EOZGRX0U9S5Y"
-  name    = "${each.value["name"]}-dev.sreenivasulareddydevops.online"
-  type    = "A"
-  ttl     = 30
-  records = [aws_instance.instance[each.value["name"]].private_ip]
-}
+#resource "aws_instance" "instance" {
+#  for_each = var.component
+##  count = length(var.component)
+#  ami           = data.aws_ami.centos.image_id
+#  instance_type = each.value["instance_type"]
+#  vpc_security_group_ids = [data.aws_security_group.allow-all.id]
+#
+#  tags = {
+#    Name = each.value["name"]
+#  }
+#}
+#
+#resource "null_resource" "provisioner" {
+#  depends_on = [aws_instance.instance,aws_route53_record.DNS_Records]
+#  for_each = var.component
+#  provisioner "remote-exec" {
+#    connection {
+#      type = "ssh"
+#      user = "centos"
+#      password = "DevOps321"
+#      host = [aws_instance.instance[each.value["name"]].private_ip]
+#    }
+#
+#    inline = [
+#      "rm -rf Roboshop-shell-practice",
+#      "https://github.com/Sreeni002/Roboshop-shell-practice.git",
+#      "cd Roboshop-shell-practice",
+#      "sudo bash ${each.value["component"]}.sh ${lookup(each.value, ["password"], "null")}"
+#    ]
+#  }
+#}
+#
+#resource "aws_route53_record" "DNS_Records" {
+#  for_each = var.component
+#  zone_id = "Z07549141EOZGRX0U9S5Y"
+#  name    = "${each.value["name"]}-dev.sreenivasulareddydevops.online"
+#  type    = "A"
+#  ttl     = 30
+#  records = [aws_instance.instance[each.value["name"]].private_ip]
+#}
 
 #resource "aws_instance" "mongodb" {
 #  ami           = data.aws_ami.centos.image_id
